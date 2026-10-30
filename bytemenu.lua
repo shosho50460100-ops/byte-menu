@@ -1,4 +1,4 @@
--- byte larp v1 | Fly & Third Person WIP, Independent Fonts/Themes, Fixed Navigation
+-- byte larp v1 | Menu Toggle Button, Fly & Third Person WIP, Independent Fonts/Themes
 -- Created by bludmonkey vr
 
 local Players = game:GetService("Players")
@@ -20,6 +20,7 @@ do
     guiParent = (ok and h) or game:GetService("CoreGui")
 end
 if guiParent:FindFirstChild("ByteLarpV1") then guiParent.ByteLarpV1:Destroy() end
+if guiParent:FindFirstChild("ByteLarpToggle") then guiParent.ByteLarpToggle:Destroy() end
 
 ---------------------------------------------------------------- helpers
 local function make(class, props, parent)
@@ -162,8 +163,23 @@ local function stopSpoof1s()
     if spoof1sThread then task.cancel(spoof1sThread) spoof1sThread = nil end
 end
 
----------------------------------------------------------------- UI BUILDER
+---------------------------------------------------------------- UI BUILDER & OPEN/CLOSE TOGGLE BUTTON
 local gui = make("ScreenGui", {Name = "ByteLarpV1", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, guiParent)
+
+-- Floating Toggle Button (Always visible to open/close the menu easily)
+local toggleGui = make("ScreenGui", {Name = "ByteLarpToggle", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, guiParent)
+local openCloseBtn = make("TextButton", {
+    Size = UDim2.fromOffset(45, 45),
+    Position = UDim2.new(0, 20, 0.4, 0),
+    BackgroundColor3 = baseBg,
+    Text = "🐵",
+    TextSize = 20,
+    BorderSizePixel = 0,
+    AutoButtonColor = false,
+    ZIndex = 99999
+}, toggleGui)
+make("UICorner", {CornerRadius = UDim.new(1, 0)}, openCloseBtn)
+local toggleStroke = make("UIStroke", {Thickness = 2, Color = activeColor}, openCloseBtn)
 
 local mainFrame = make("Frame", {
     Size = UDim2.fromOffset(420, 560),
@@ -171,6 +187,11 @@ local mainFrame = make("Frame", {
     BackgroundColor3 = baseBg,
     BorderSizePixel = 0,
 }, gui)
+
+openCloseBtn.MouseButton1Click:Connect(function()
+    playClick()
+    mainFrame.Visible = not mainFrame.Visible
+end)
 
 local mainStroke = make("UIStroke", {Thickness = 2, Color = activeColor, Transparency = 0.2}, mainFrame)
 make("UICorner", {CornerRadius = UDim.new(0, 12)}, mainFrame)
@@ -227,7 +248,10 @@ local exitBtn = make("TextButton", {
 }, header)
 make("UICorner", {CornerRadius = UDim.new(0, 6)}, exitBtn)
 local exitBtnStroke = make("UIStroke", {Thickness = 1, Color = activeColor, Transparency = 0.5}, exitBtn)
-exitBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
+exitBtn.MouseButton1Click:Connect(function() 
+    gui:Destroy() 
+    toggleGui:Destroy() 
+end)
 
 -- Categories Bar (Top)
 local catContainer = make("ScrollingFrame", {
@@ -480,6 +504,7 @@ updateThemeAndFont = function()
     prevPageBtn.BackgroundColor3 = baseBg
     homeBtn.BackgroundColor3 = baseBg
     nextPageBtn.BackgroundColor3 = baseBg
+    openCloseBtn.BackgroundColor3 = baseBg
 
     mainStroke.Color = activeColor
     headerStroke.Color = activeColor
@@ -489,6 +514,7 @@ updateThemeAndFont = function()
     prevStroke.Color = activeColor
     homeStroke.Color = activeColor
     nextStroke.Color = activeColor
+    toggleStroke.Color = activeColor
     contentFrame.ScrollBarImageColor3 = activeColor
 
     titleLabel.Font = activeFont
